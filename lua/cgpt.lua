@@ -5,6 +5,7 @@ local M = {}
 M.config = {
   -- default config
   opt = "Hello!",
+  lang = "ja",
 }
 
 -- setup is the public method to setup your plugin
@@ -17,6 +18,9 @@ end
 -- "hello" is a public method for the plugin
 M.hello = function()
   module.my_first_function()
+end
+M.code_review = function()
+  module.code_review()
 end
 
 return M
