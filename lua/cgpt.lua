@@ -16,7 +16,7 @@ end
 
 -- "hello" is a public method for the plugin
 M.hello = function()
-  print(module.my_first_function())
+  module.my_first_function()
 end
 
 return M
