@@ -4,7 +4,7 @@ local M = {}
 local jobid = -1
 local bufName = "__ChatCpt__"
 
-local function create_buffer()
+local function forcus_buffer()
   local bufId = vim.fn.bufnr(bufName)
   local windows = vim.fn.win_findbuf(bufId)
   if #windows <= 0 then
@@ -23,13 +23,11 @@ local function create_buffer()
   end
 end
 
-local function focus_buffer() end
-
 local function print_stdout(chan_id, data, name)
   local bufId = vim.fn.bufnr(bufName)
   local windows = vim.fn.win_findbuf(bufId)
   if #windows <= 0 then
-    create_buffer()
+    forcus_buffer()
   else
     vim.fn.win_gotoid(windows[1])
     local win = vim.api.nvim_get_current_win()
@@ -48,7 +46,7 @@ local function get_channel()
 end
 
 M.my_first_function = function()
-  create_buffer()
+  forcus_buffer()
   local id = get_channel()
 end
 
