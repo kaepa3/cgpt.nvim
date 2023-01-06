@@ -37,11 +37,11 @@ local add_text = {}
 local new_line = "\n"
 
 local function add_next_to_table(text)
-  textVal = text == new_line and "" or text
+  local textVal = text == new_line and "" or text
   if #add_text == 0 then
     add_text = { textVal }
   else
-    before_text = add_text[#add_text]
+    local localbefore_text = add_text[#add_text]
     if before_text == "" or text == new_line then
       table.insert(add_text, textVal)
     else
@@ -51,7 +51,7 @@ local function add_next_to_table(text)
 end
 
 local function print_stdout(chan_id, data, name)
-  val = vim.fn.json_decode(data[1])
+  local val = vim.fn.json_decode(data[1])
   add_next_to_table(val["text"])
   if val["eof"] == true then
     focus_buffer()
