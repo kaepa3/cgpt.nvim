@@ -16,11 +16,12 @@ M.setup = function(args)
 end
 
 -- "hello" is a public method for the plugin
-M.hello = function()
-  module.my_first_function()
+M.ask = function(opt)
+  module.ask(opt.args)
 end
+
 M.code_review = function()
-  module.code_review()
+  module.code_review(M.config.lang)
 end
 
 return M

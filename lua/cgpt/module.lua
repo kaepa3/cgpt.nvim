@@ -1,38 +1,28 @@
 -- module represents a lua module for the plugin
-
 local M = {}
 
 local jobid = -1
-local bufName = "__ChatCpt__"
+local chat_buffer_name = "__ChatCpt__"
 
-local function dump(o)
-  if type(o) == "table" then
-    local s = "{ "
-    for k, v in pairs(o) do
-      if type(k) ~= "number" then
-        k = '"' .. k .. '"'
-      end
-      s = s .. "[" .. k .. "] = " .. dump(v) .. ","
-    end
-    return s .. "} "
-  else
-    return tostring(o)
-  end
+local function get_current_buffer()
+  local win = vim.api.nvim_get_current_win()
+  local buf = vim.api.nvim_win_get_buf(win)
+  return buf
 end
 
 local function isempty(s)
   return s == nil or s == ""
 end
 
-local function forcus_buffer()
-  local bufId = vim.fn.bufnr(bufName)
+local function focus_buffer()
+  local bufId = vim.fn.bufnr(chat_buffer_name)
   local windows = vim.fn.win_findbuf(bufId)
   if #windows <= 0 then
     if bufId ~= -1 then
       vim.cmd("b " .. bufId)
     else
       local buf = vim.api.nvim_create_buf(true, true)
-      vim.api.nvim_buf_set_name(buf, bufName)
+      vim.api.nvim_buf_set_name(buf, chat_buffer_name)
       vim.api.nvim_buf_set_option(buf, "modifiable", false)
       vim.cmd("vsplit")
       local win = vim.api.nvim_get_current_win()
@@ -44,58 +34,34 @@ local function forcus_buffer()
 end
 
 local add_text = {}
-
 local new_line = "\n"
 
-local function add_table(text)
+local function add_next_to_table(text)
+  textVal = text == new_line and "" or text
   if #add_text == 0 then
-    if text == new_line then
-      add_text = { "" }
-    else
-      add_text = { text }
-    end
+    add_text = { textVal }
   else
     before_text = add_text[#add_text]
     if before_text == "" or text == new_line then
-      if text == new_line then
-        table.insert(add_text, "")
-      else
-        table.insert(add_text, text)
-      end
+      table.insert(add_text, textVal)
     else
-      updateText = before_text .. text
-      add_text[#add_text] = updateText
+      add_text[#add_text] = before_text .. textVal
     end
   end
 end
 
 local function print_stdout(chan_id, data, name)
-  print("----------------------------------------")
-  print(dump(data))
-  print(dump(data[1]))
-  print("----------------------------------------")
   val = vim.fn.json_decode(data[1])
-  add_table(val["text"])
+  add_next_to_table(val["text"])
   if val["eof"] == true then
-    local bufId = vim.fn.bufnr(bufName)
-    local windows = vim.fn.win_findbuf(bufId)
-    if #windows <= 0 then
-      forcus_buffer()
-    else
-      vim.fn.win_gotoid(windows[1])
-    end
-    local win = vim.api.nvim_get_current_win()
-    local buf = vim.api.nvim_win_get_buf(win)
+    focus_buffer()
+    local buf = get_current_buffer()
     vim.api.nvim_buf_set_option(buf, "modifiable", true)
     vim.api.nvim_buf_set_lines(buf, -1, -1, true, add_text)
     vim.api.nvim_buf_set_option(buf, "modifiable", false)
     add_text = {}
   elseif not isempty(val["error"]) then
-    local win = vim.api.nvim_get_current_win()
-    local buf = vim.api.nvim_win_get_buf(win)
-    vim.api.nvim_buf_set_option(buf, "modifiable", true)
-    vim.api.nvim_buf_set_lines(buf, -1, -1, true, { val["error"] })
-    vim.api.nvim_buf_set_option(buf, "modifiable", false)
+    print(val["error"])
     add_text = {}
   end
 end
@@ -107,25 +73,16 @@ local function get_channel()
   return jobid
 end
 
-M.my_first_function = function()
-  forcus_buffer()
-  local id = get_channel()
-end
-
 local function send(text)
-  forcus_buffer()
+  focus_buffer()
   local ch = get_channel()
   local json = vim.fn.json_encode({ text = text })
   vim.fn.chansend(ch, json)
-  print(dump(text))
 end
 
-M.code_review = function()
-  --local lang = M.config.lang
-  local lang = "ja"
+M.code_review = function(lang)
   local question = lang == "ja" and "このプログラムをレビューして下さい。" or "please code review"
-  local win = vim.api.nvim_get_current_win()
-  local buf = vim.api.nvim_win_get_buf(win)
+  local buf = get_current_buffer()
   local text = vim.api.nvim_buf_get_lines(buf, 0, -1, true)
   local lines = { question, "", "" }
   for _, value in ipairs(text) do
@@ -133,6 +90,14 @@ M.code_review = function()
   end
   table.insert(lines, new_line)
   send(table.concat(lines, "\n"))
+end
+
+M.ask = function(args)
+  if #args == 0 then
+    print("input error")
+    return
+  end
+  send(args)
 end
 
 return M
