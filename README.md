@@ -1,45 +1,33 @@
-# A Neovim Plugin Template
+# ChatCpt for nvim
 
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ellisonleao/nvim-plugin-template/default.yml?branch=main&style=for-the-badge)
-![Lua](https://img.shields.io/badge/Made%20with%20Lua-blueviolet.svg?style=for-the-badge&logo=lua)
+this dependent "ChatGpt" Command
 
+install "chatgpt" command
 
-A template repository for Neovim plugins.
+- https://github.com/mattn/chatgpt
+- https://github.com/kaepa3/chatgpt
 
-## Using it
+kaepa3 version can use godotenv.
+differece is only that
 
-Via `gh`:
+# add plugin
 
+```lua
+require("lazy").setup({
+    { "kaepa3/cgpt.nvim" },
+})
 ```
-$ gh repo create my-plugin -p ellisonleao/nvim-plugin-template
+
+# add comand
+
+start current buffer code review
+
+```bash
+> CodeReview
 ```
 
-Via github web page:
+ask ChatGpt
 
-Click on `Use this template`
-
-![](https://docs.github.com/assets/cb-36544/images/help/repository/use-this-template-button.png)
-
-## Features and structure
-
-- 100% Lua
-- Github actions to run tests and check for formatting errors (Stylua)
-- Tests created with [busted](https://olivinelabs.com/busted/) + [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
-
-### Plugin structure
-
-```
-.
-├── lua
-│   ├── plugin_name
-│   │   └── module.lua
-│   └── plugin_name.lua
-├── Makefile
-├── plugin
-│   └── plugin_name.lua
-├── README.md
-├── tests
-│   ├── minimal_init.lua
-│   └── plugin_name
-│       └── plugin_name_spec.lua
+```bash
+> Cgpt 'question'
 ```
