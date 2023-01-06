@@ -17,11 +17,16 @@ end
 
 -- "hello" is a public method for the plugin
 M.ask = function(opt)
-  module.ask(opt.args)
+  if #opt.args == 0 then
+    print("input error")
+    return
+  end
+  module.send(opt.args)
 end
 
 M.code_review = function()
-  module.code_review(M.config.lang)
+  query = module.create_codereview_query(M.config.lang)
+  module.send(query)
 end
 
 return M

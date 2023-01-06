@@ -41,7 +41,7 @@ local function add_next_to_table(text)
   if #add_text == 0 then
     add_text = { textVal }
   else
-    local localbefore_text = add_text[#add_text]
+    local before_text = add_text[#add_text]
     if before_text == "" or text == new_line then
       table.insert(add_text, textVal)
     else
@@ -73,14 +73,14 @@ local function get_channel()
   return jobid
 end
 
-local function send(text)
+M.send = function(text)
   focus_buffer()
   local ch = get_channel()
   local json = vim.fn.json_encode({ text = text })
   vim.fn.chansend(ch, json)
 end
 
-M.code_review = function(lang)
+M.create_codereview_query = function(lang)
   local question = lang == "ja" and "このプログラムをレビューして下さい。" or "please code review"
   local buf = get_current_buffer()
   local text = vim.api.nvim_buf_get_lines(buf, 0, -1, true)
@@ -89,15 +89,7 @@ M.code_review = function(lang)
     table.insert(lines, value)
   end
   table.insert(lines, new_line)
-  send(table.concat(lines, "\n"))
-end
-
-M.ask = function(args)
-  if #args == 0 then
-    print("input error")
-    return
-  end
-  send(args)
+  return table.concat(lines, "\n")
 end
 
 return M
