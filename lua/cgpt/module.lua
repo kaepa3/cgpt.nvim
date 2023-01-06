@@ -70,10 +70,13 @@ local function add_table(text)
 end
 
 local function print_stdout(chan_id, data, name)
+  print("----------------------------------------")
+  print(dump(data))
+  print(dump(data[1]))
+  print("----------------------------------------")
   val = vim.fn.json_decode(data[1])
   add_table(val["text"])
   if val["eof"] == true then
-    print(dump(add_text))
     local bufId = vim.fn.bufnr(bufName)
     local windows = vim.fn.win_findbuf(bufId)
     if #windows <= 0 then
@@ -99,7 +102,6 @@ end
 
 local function get_channel()
   if jobid == -1 then
-    --jobid = vim.fn.jobstart("ls", { on_stdout = print_stdout })
     jobid = vim.fn.jobstart({ "chatgpt", "-json" }, { on_stdout = print_stdout })
   end
   return jobid
@@ -115,17 +117,22 @@ local function send(text)
   local ch = get_channel()
   local json = vim.fn.json_encode({ text = text })
   vim.fn.chansend(ch, json)
+  print(dump(text))
 end
 
 M.code_review = function()
   --local lang = M.config.lang
   local lang = "ja"
-  local question = lang == "^ja" and "このプログラムをレビューして下さい。" or "please code review"
+  local question = lang == "ja" and "このプログラムをレビューして下さい。" or "please code review"
   local win = vim.api.nvim_get_current_win()
   local buf = vim.api.nvim_win_get_buf(win)
   local text = vim.api.nvim_buf_get_lines(buf, 0, -1, true)
-  --/local lines = { question, "\n", text }
-  send("今日の天気は？ ")
+  local lines = { question, "", "" }
+  for _, value in ipairs(text) do
+    table.insert(lines, value)
+  end
+  table.insert(lines, new_line)
+  send(table.concat(lines, "\n"))
 end
 
 return M
